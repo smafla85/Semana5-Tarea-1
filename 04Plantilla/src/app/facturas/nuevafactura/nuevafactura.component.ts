@@ -5,12 +5,12 @@ import { IFactura } from 'src/app/Interfaces/factura';
 import { ICliente } from 'src/app/Interfaces/icliente';
 import { ClientesService } from 'src/app/Services/clientes.service';
 import { FacturaService } from 'src/app/Services/factura.service';
-import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-nuevafactura',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './nuevafactura.component.html',
   styleUrl: './nuevafactura.component.scss'
 })
@@ -31,6 +31,13 @@ export class NuevafacturaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.idFactura = +id;
+      this.titulo = 'Editar Factura';
+      this.cargarFactura(this.idFactura);
+    }
+
     this.frm_factura = new FormGroup({
       Fecha: new FormControl('', Validators.required),
       Sub_total: new FormControl('', Validators.required),
@@ -38,13 +45,6 @@ export class NuevafacturaComponent implements OnInit {
       Valor_IVA: new FormControl(this.ivaFijo, Validators.required),
       Clientes_idClientes: new FormControl('', Validators.required)
     });
-
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.idFactura = +id;
-      this.titulo = 'Editar Factura';
-      this.cargarFactura(this.idFactura);
-    }
 
     this.cargarClientes();
   }
@@ -57,6 +57,7 @@ export class NuevafacturaComponent implements OnInit {
       },
       error: (e) => {
         console.log(e);
+        Swal.fire('Error', 'Error al cargar los clientes', 'error');
       }
     });
   }
@@ -65,7 +66,7 @@ export class NuevafacturaComponent implements OnInit {
     this.facturaService.uno(id).subscribe({
       next: (factura: IFactura) => {
         this.frm_factura.patchValue({
-          Fecha: factura.Fecha,
+          Fecha: factura.Fecha.split(' ')[0], // Asumiendo que la fecha viene con hora
           Sub_total: factura.Sub_total,
           Sub_total_iva: factura.Sub_total_iva,
           Valor_IVA: this.ivaFijo, // Siempre usamos el valor fijo
@@ -73,7 +74,10 @@ export class NuevafacturaComponent implements OnInit {
         });
         this.calculos();
       },
-      error: (e) => console.error('Error al cargar la factura', e)
+      error: (e) => {
+        console.error('Error al cargar la factura', e);
+        Swal.fire('Error', 'No se pudo cargar la factura', 'error');
+      }
     });
   }
 
@@ -87,21 +91,41 @@ export class NuevafacturaComponent implements OnInit {
         this.facturaService.actualizar(factura).subscribe({
           next: (respuesta) => {
             if (respuesta) {
-              alert('Factura actualizada con éxito');
-              this.navegacion.navigate(['/facturas']);
+              Swal.fire({
+                title: 'Éxito',
+                text: 'Factura actualizada correctamente',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+              }).then(() => {
+                this.navegacion.navigate(['/facturas']);
+              });
             }
           },
-          error: (e) => console.error('Error al actualizar la factura', e)
+          error: (e) => {
+            console.error('Error al actualizar la factura', e);
+            Swal.fire('Error', 'No se pudo actualizar la factura', 'error');
+          }
         });
       } else {
         this.facturaService.insertar(factura).subscribe({
           next: (respuesta) => {
             if (parseInt(respuesta) > 0) {
-              alert('Factura grabada');
-              this.navegacion.navigate(['/facturas']);
+              Swal.fire({
+                title: 'Éxito',
+                text: 'Factura guardada correctamente',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+              }).then(() => {
+                this.navegacion.navigate(['/facturas']);
+              });
             }
           },
-          error: (e) => console.error('Error al insertar la factura', e)
+          error: (e) => {
+            console.error('Error al insertar la factura', e);
+            Swal.fire('Error', 'No se pudo guardar la factura', 'error');
+          }
         });
       }
     }
