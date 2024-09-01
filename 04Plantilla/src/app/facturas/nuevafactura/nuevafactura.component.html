@@ -1,0 +1,66 @@
+<div class="card my-5">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <h3 class="mb-0">{{ titulo }}</h3>
+    </div>
+
+    <form [formGroup]="frm_factura" (ngSubmit)="grabar()">
+      <div class="row">
+        <div class="form-group mb-3">
+          <label for="Clientes_idClientes">Cliente</label>
+          <select class="form-control" formControlName="Clientes_idClientes" (change)="cambio($event)">
+            <option value="">Seleccione una opcion</option>
+            @for (cliente of listaClientes; track $index) {
+              <option [value]="cliente.idClientes">{{ cliente.Nombres }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Fecha">Fecha</label>
+          <input type="date" class="form-control" formControlName="Fecha">
+          @if (frm_factura.get('Fecha')?.invalid && frm_factura.get('Fecha')?.touched) {
+            <div>
+              @if (frm_factura.get('Fecha')?.hasError('required')) {
+                <small class="text-danger">La fecha es requerida</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Sub_total">Sub_total</label>
+          <input type="number" class="form-control" formControlName="Sub_total" (input)="calculos()">
+          @if (frm_factura.get('Sub_total')?.invalid && frm_factura.get('Sub_total')?.touched) {
+            <div>
+              @if (frm_factura.get('Sub_total')?.hasError('required')) {
+                <small class="text-danger">El sub_total es requerido</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Sub_total_iva">Sub_total_iva</label>
+          <input type="number" class="form-control" formControlName="Sub_total_iva" readonly>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="Valor_IVA">Valor_IVA</label>
+          <input type="number" class="form-control" formControlName="Valor_IVA" readonly>
+        </div>
+
+        <div class="form-group mb-3">
+          <label>Total a Pagar</label>
+          <input type="number" class="form-control" [value]="totalapagar" readonly>
+        </div>
+
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-primary" [disabled]="frm_factura.invalid">
+            {{ idFactura ? 'Actualizar' : 'Grabar' }} factura
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

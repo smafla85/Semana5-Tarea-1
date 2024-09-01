@@ -1,0 +1,55 @@
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card">
+      <div class="card-header">
+        <h5>Lista de Facturas</h5>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col">
+            <a [routerLink]="['/nuevafactura']" class="btn btn-primary">
+              <i class="feather icon-plus"></i> Nueva Factura
+            </a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Número de Factura</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (factura of listafacturas; track factura.idFactura) {
+                <tr>
+                  <td>{{ $index + 1 }}</td>
+                  <td>000{{ factura.idFactura }}</td>
+                  <td>{{ factura.Nombres }}</td>
+                  <td>{{ factura.Fecha | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ factura.total | currency:'USD':'symbol':'1.2-2' }}</td>
+                  <td>
+                    <button class="btn btn-info btn-sm mr-2" (click)="editarFactura(factura.idFactura)">
+                      <i class="feather icon-edit"></i> Editar
+                    </button>
+                    <button class="btn btn-danger btn-sm" (click)="eliminar(factura.idFactura)">
+                      <i class="feather icon-trash-2"></i> Eliminar
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="text-center">No hay facturas registradas</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
